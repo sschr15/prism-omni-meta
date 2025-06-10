@@ -1,0 +1,48 @@
+name: Build Pages
+
+on:
+  cron:
+    - '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
+      - uses: oven-sh/setup-bun@v2
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Set up directory
+        run: |
+          mkdir -p _site/v1
+
+      - name: Move Prism's meta information
+        run: |
+          to_move=$(echo meta-launcher/*)
+          mv $to_move _site/v1
+
+      - name: Create and move modified metabolism information
+        run: |
+          cd metabolism
+          bun install
+          bun start build net.minecraft
+          cd ..
+          rm -r _site/v1/net.minecraft
+          mv metabolism/run/output/net.minecraft _site/v1/
+
+      - name: Fix index.json
+        run: |
+          python3 fix_index.py
+
+      - name: Build and deploy
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          publish_dir: ./_site
+          github_token: ${{ secrets.GITHUB_TOKEN }}

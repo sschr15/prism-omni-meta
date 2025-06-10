@@ -1,0 +1,6 @@
+[submodule "meta-launcher"]
+	path = meta-launcher
+	url = https://github.com/PrismLauncher/meta-launcher.git
+[submodule "metabolism"]
+	path = metabolism
+	url = https://github.com/sschr15/metabolism.git
